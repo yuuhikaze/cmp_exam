@@ -83,6 +83,10 @@ public class Scene02 implements AutoCloseable {
         }
 
         tableView.setItems(persons);
+        tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        nameCol.setMaxWidth(1f * Integer.MAX_VALUE * 20);
+        surnameCol.setMaxWidth(1f * Integer.MAX_VALUE * 20);
+        careerCol.setMaxWidth(1f * Integer.MAX_VALUE * 60);
     }
 
     @FXML
