@@ -1,0 +1,41 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.1.0'
+}
+
+group 'com.yuuhikaze'
+version '0.1.0'
+
+sourceCompatibility = '21'
+targetCompatibility = '21'
+
+application {
+    mainClass = 'com.yuuhikaze.exam_02.Main'
+}
+
+jar {
+    manifest {
+        attributes(
+            'Main-Class': 'com.yuuhikaze.exam_02.Main'
+        )
+    }
+}
+
+repositories {
+    mavenCentral()
+    flatDir {
+        dirs('libs')
+    }
+}
+
+javafx {
+    version = '21'
+    modules = [ 'javafx.controls', 'javafx.fxml' ]
+}
+
+dependencies {
+    implementation("org.flywaydb:flyway-mysql:9.22.2")
+    implementation('org.flywaydb:flyway-core:9.22.2')
+    implementation(':mysql-connector-j-9.1.0:')
+}
