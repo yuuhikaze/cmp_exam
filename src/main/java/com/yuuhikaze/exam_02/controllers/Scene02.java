@@ -112,7 +112,8 @@ public class Scene02 implements AutoCloseable {
             LoggerSingleton.logInfo(instruction);
             connection.executeInstruction(instruction);
             persons.add(person);
-            tableView.refresh();
+            tableView.setItems(persons);
+            filtersCheckbox.setSelected(false);
         } else {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setHeaderText(null);
@@ -131,7 +132,8 @@ public class Scene02 implements AutoCloseable {
             LoggerSingleton.logInfo(instruction);
             connection.executeInstruction(instruction);
             persons.remove(selectedPerson);
-            tableView.refresh();
+            tableView.setItems(persons);
+            filtersCheckbox.setSelected(false);
         } else {
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setHeaderText(null);
