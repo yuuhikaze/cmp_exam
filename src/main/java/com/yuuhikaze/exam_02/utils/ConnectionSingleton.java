@@ -1,4 +1,4 @@
-package com.yuuhikaze.exam_02;
+package com.yuuhikaze.exam_02.utils;
 
 import com.yuuhikaze.exam_02.model.MySQLConnection;
 

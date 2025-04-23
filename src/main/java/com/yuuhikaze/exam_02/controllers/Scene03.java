@@ -2,7 +2,6 @@ package com.yuuhikaze.exam_02.controllers;
 
 import com.yuuhikaze.exam_02.Person;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
@@ -30,7 +29,7 @@ public class Scene03 {
         }
         return person;
     }
-    
+
     public void initTextFields(String name, String surname, int age) {
         nameField.setText(name);
         surnameField.setText(surname);

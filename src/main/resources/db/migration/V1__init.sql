@@ -6,7 +6,9 @@ CREATE TABLE IF NOT EXISTS auth (
     password VARCHAR(45) NOT NULL
 );
 
-INSERT INTO auth (user,password) VALUES ('DDR','123456'), ('Fer','654321');
+INSERT INTO auth (user,password) VALUES
+    ('DDR','123456'),
+    ('Fer','654321');
 
 CREATE TABLE IF NOT EXISTS students (
     id_students INT AUTO_INCREMENT PRIMARY KEY,
@@ -14,3 +16,13 @@ CREATE TABLE IF NOT EXISTS students (
     surname VARCHAR(100),
     career VARCHAR(100)
 );
+
+INSERT INTO students (name, surname, career) VALUES
+    ('John', 'Smith', 'Software Engineering'),
+    ('Alice', 'Johnson', 'Computer Science'),
+    ('Bob', 'Brown', 'Mechanical Engineering'),
+    ('Sarah', 'Davis', 'Software Engineering'),
+    ('Tom', 'Wilson', 'Electrical Engineering'),
+    ('Emily', 'Clark', 'Computer Science'),
+    ('Michael', 'Harris', 'Mechanical Engineering'),
+    ('Lisa', 'Lewis', 'Software Engineering');

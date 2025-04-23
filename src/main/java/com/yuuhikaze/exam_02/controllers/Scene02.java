@@ -1,9 +1,10 @@
 package com.yuuhikaze.exam_02.controllers;
 
-import com.yuuhikaze.exam_02.ConnectionSingleton;
 import com.yuuhikaze.exam_02.Person;
 import com.yuuhikaze.exam_02.model.MySQLConnection;
+import com.yuuhikaze.exam_02.utils.ConnectionSingleton;
 import com.yuuhikaze.exam_02.utils.FXMLCore;
+import com.yuuhikaze.exam_02.utils.LoggerSingleton;
 import java.io.IOException;
 import java.sql.SQLException;
 import javafx.collections.FXCollections;
@@ -14,13 +15,14 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.util.converter.IntegerStringConverter;
 
 public class Scene02 implements AutoCloseable {
     private MySQLConnection connection = ConnectionSingleton.connection;
@@ -29,7 +31,7 @@ public class Scene02 implements AutoCloseable {
     @FXML
     private TableColumn<Person, String> surnameCol;
     @FXML
-    private TableColumn<Person, Integer> careerCol;
+    private TableColumn<Person, String> careerCol;
     @FXML
     private Button addButton;
     @FXML
@@ -38,6 +40,10 @@ public class Scene02 implements AutoCloseable {
     private Button deleteButton;
     @FXML
     private TableView<Person> tableView;
+    @FXML
+    private CheckBox filtersCheckbox;
+    @FXML
+    private ComboBox<String> careerFilterComboBox;
 
     private ObservableList<Person> persons;
 
@@ -47,12 +53,24 @@ public class Scene02 implements AutoCloseable {
 
         nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
         surnameCol.setCellValueFactory(new PropertyValueFactory<>("surname"));
+        careerCol.setCellValueFactory(new PropertyValueFactory<>("career"));
 
         nameCol.setCellFactory(TextFieldTableCell.forTableColumn());
         surnameCol.setCellFactory(TextFieldTableCell.forTableColumn());
-        careerCol.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
+        careerCol.setCellFactory(TextFieldTableCell.forTableColumn());
 
-        connection.executeQuery("SELECT * FROM students");
+        nameCol.setSortable(true);
+        surnameCol.setSortable(true);
+        careerCol.setSortable(true);
+
+        loadCareerOptions();
+
+        careerFilterComboBox.setOnAction(event -> filterByCareer());
+        filtersCheckbox.setOnAction(event -> filterByCareer());
+
+        String query = "SELECT * FROM students";
+        LoggerSingleton.logInfo(query);
+        connection.executeQuery(query);
         var res = connection.getResultSet();
 
         while (res.next()) {
@@ -85,8 +103,10 @@ public class Scene02 implements AutoCloseable {
         }
 
         if (!persons.contains(person)) {
-            connection.executeInstruction(
-                "INSERT INTO students (name,surname,career) VALUES (\"" + person.getName() + "\",\"" + person.getSurname() + "\"," + person.getCareer() + ")");
+            String instruction =
+                "INSERT INTO students (name,surname,career) VALUES (\"" + person.getName() + "\",\"" + person.getSurname() + "\",\"" + person.getCareer() + "\")";
+            LoggerSingleton.logInfo(instruction);
+            connection.executeInstruction(instruction);
             persons.add(person);
             tableView.refresh();
         } else {
@@ -102,8 +122,10 @@ public class Scene02 implements AutoCloseable {
     public void deletePerson(ActionEvent event) throws SQLException {
         Person selectedPerson = tableView.getSelectionModel().getSelectedItem();
         if (selectedPerson != null) {
-            connection.executeInstruction(
-                "DELETE FROM students WHERE name = \"" + selectedPerson.getName() + "\" AND surname = \"" + selectedPerson.getSurname() + "\" AND career = " + selectedPerson.getCareer());
+            String instruction =
+                "DELETE FROM students WHERE name = \"" + selectedPerson.getName() + "\" AND surname = \"" + selectedPerson.getSurname() + "\" AND career = \"" + selectedPerson.getCareer() + "\"";
+            LoggerSingleton.logInfo(instruction);
+            connection.executeInstruction(instruction);
             persons.remove(selectedPerson);
             tableView.refresh();
         } else {
@@ -113,6 +135,72 @@ public class Scene02 implements AutoCloseable {
             alert.setContentText("No person selected to delete");
             alert.showAndWait();
         }
+    }
+
+    private void loadCareerOptions() throws SQLException {
+        String query = "SELECT DISTINCT career FROM students";
+        LoggerSingleton.logInfo(query);
+        connection.executeQuery(query);
+        var res = connection.getResultSet();
+
+        careerFilterComboBox.getItems().clear();
+        while (res.next()) {
+            String career = res.getString("career");
+            careerFilterComboBox.getItems().add(career);
+        }
+
+        if (!careerFilterComboBox.getItems().isEmpty()) {
+            careerFilterComboBox.setValue(careerFilterComboBox.getItems().get(0));
+        }
+    }
+
+    private void filterByCareer() {
+        ObservableList<Person> filteredList = FXCollections.observableArrayList();
+
+        if (filtersCheckbox.isSelected() && careerFilterComboBox.getValue() != null) {
+            String selectedCareer = careerFilterComboBox.getValue();
+            String query = "SELECT * FROM students WHERE career = \"" + selectedCareer + "\"";
+            LoggerSingleton.logInfo(query);
+            try {
+                connection.executeQuery(query);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            var res = connection.getResultSet();
+
+            try {
+                while (res.next()) {
+                    String name = res.getString("name");
+                    String surname = res.getString("surname");
+                    String career = res.getString("career");
+                    filteredList.add(new Person(name, surname, career));
+                }
+            } catch (SQLException e) {
+                LoggerSingleton.logSevere("Error loading filtered students: " + e.getMessage());
+            }
+        } else {
+            String query = "SELECT * FROM students";
+            LoggerSingleton.logInfo(query);
+            try {
+                connection.executeQuery(query);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            var res = connection.getResultSet();
+
+            try {
+                while (res.next()) {
+                    String name = res.getString("name");
+                    String surname = res.getString("surname");
+                    String career = res.getString("career");
+                    filteredList.add(new Person(name, surname, career));
+                }
+            } catch (SQLException e) {
+                LoggerSingleton.logSevere("Error loading all students: " + e.getMessage());
+            }
+        }
+
+        tableView.setItems(filteredList);
     }
 
     @Override

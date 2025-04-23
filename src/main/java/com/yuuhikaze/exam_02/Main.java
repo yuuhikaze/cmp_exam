@@ -1,5 +1,6 @@
 package com.yuuhikaze.exam_02;
 
+import com.yuuhikaze.exam_02.utils.DirManagerSingleton;
 import com.yuuhikaze.exam_02.utils.FXMLCore;
 import java.io.IOException;
 import javafx.application.Application;
@@ -12,7 +13,8 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        scene = new Scene(FXMLCore.loadFXML("Scene01"), 640, 480);
+        DirManagerSingleton.createDataDir();
+        scene = new Scene(FXMLCore.loadFXML("Scene01"));
         stage.setScene(scene);
         stage.show();
     }

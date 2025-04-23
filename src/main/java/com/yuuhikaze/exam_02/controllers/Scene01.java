@@ -1,6 +1,6 @@
 package com.yuuhikaze.exam_02.controllers;
 
-import com.yuuhikaze.exam_02.ConnectionSingleton;
+import com.yuuhikaze.exam_02.utils.ConnectionSingleton;
 import com.yuuhikaze.exam_02.model.MySQLConnection;
 import com.yuuhikaze.exam_02.utils.FXMLCore;
 import java.io.IOException;
@@ -33,20 +33,19 @@ public class Scene01 {
                     "SELECT user FROM auth WHERE user = \"" + userField.getText() + "\" AND password = \""
                             + passwordField.getText() + "\"");
             var res = connection.getResultSet();
-            res.next();
-            if (res.getString("user").equals("")) {
-                Alert alert = new Alert(AlertType.ERROR);
-                alert.setContentText("User not found in database");
-                alert.show();
-            } else {
+            if (res.isBeforeFirst()) {
                 FXMLLoader loader02 = FXMLCore.createLoader("Scene02");
-                Scene scene02 = new Scene(loader02.load());
+                Scene scene02 = new Scene(loader02.load(), 640, 360);
                 Stage stage = new Stage();
                 stage.initModality(Modality.APPLICATION_MODAL);
                 stage.setScene(scene02);
                 stage.show();
                 Stage this_stage = (Stage) this.loginButton.getScene().getWindow();
                 this_stage.close();
+            } else {
+                Alert alert = new Alert(AlertType.ERROR);
+                alert.setContentText("User not found in database");
+                alert.show();
             }
         } catch (SQLException e) {
             e.printStackTrace();
